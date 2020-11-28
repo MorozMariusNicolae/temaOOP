@@ -12,17 +12,23 @@ public final class MovieInputData extends ShowInput {
      * Duration in minutes of a season
      */
     private final int duration;
+    private double rating;
 
     public MovieInputData(final String title, final ArrayList<String> cast,
                           final ArrayList<String> genres, final int year,
                           final int duration) {
         super(title, year, cast, genres);
         this.duration = duration;
+        rating = 0;
     }
 
     public int getDuration() {
         return duration;
     }
+
+    public double getRating(){ return rating; }
+
+    public void setRating(double rating) { this.rating = rating;}
 
     @Override
     public String toString() {

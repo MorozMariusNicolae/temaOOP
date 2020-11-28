@@ -26,6 +26,8 @@ public final class UserInputData {
      */
     private final ArrayList<String> favoriteMovies;
 
+    private ArrayList<Object> rateMovies;
+
     public UserInputData(final String username, final String subscriptionType,
                          final Map<String, Integer> history,
                          final ArrayList<String> favoriteMovies) {
@@ -33,6 +35,7 @@ public final class UserInputData {
         this.subscriptionType = subscriptionType;
         this.favoriteMovies = favoriteMovies;
         this.history = history;
+        rateMovies = null;
     }
 
     public String getUsername() {
@@ -49,6 +52,14 @@ public final class UserInputData {
 
     public ArrayList<String> getFavoriteMovies() {
         return favoriteMovies;
+    }
+
+    public ArrayList<Object> getRateMovies() {
+        return rateMovies;
+    }
+
+    public void setRateMovies(Object rate) {
+        rateMovies.add(rate);
     }
 
     @Override
