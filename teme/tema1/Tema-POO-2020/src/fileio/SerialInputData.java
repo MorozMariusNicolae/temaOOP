@@ -46,4 +46,32 @@ public final class  SerialInputData extends ShowInput {
                 + " numberSeason= " + numberOfSeasons
                 + ", seasons=" + seasons + "\n\n" + '}';
     }
+
+    public double totalRating(){
+        double totalseason = 0.0;
+        double total = 0.0;
+        int nr = 0;
+        int nrtotal = 0;
+        if (seasons.size() > 0){
+            for (int i = 0; i < seasons.size(); i++){
+                nr = 0;
+                for (int j = 0; j < seasons.get(i).getRatings().size(); j++){
+                    if (seasons.get(i).getRatings().get(j) >= 1){
+                        nr++;
+                    }
+                    totalseason += seasons.get(i).getRatings().get(j);
+                }
+                if (totalseason != 0){
+                    total += totalseason;
+                    nrtotal++;
+                }
+            }
+            if (nrtotal > 0) {
+                return total / nrtotal;
+            } else {
+                return nrtotal;
+            }
+        }
+        return 0;
+    }
 }
