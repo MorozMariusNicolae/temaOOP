@@ -74,6 +74,140 @@ public final class Main {
         //System.out.println(input.getCommands());
         for (ActionInputData data : input.getCommands()) {
             if (data.getActionType().compareTo("query") == 0) {
+                if (data.getObjectType().compareTo("actors") == 0) {
+                    if (data.getCriteria().compareTo("average") == 0) {
+                        ArrayList<String> names = new ArrayList<>();
+                        ArrayList<Double> rat = new ArrayList<>();
+                        for (ActorInputData actor : input.getActors()
+                        ) {
+                            int num = 0;
+                            double total = 0;
+                            for (MovieInputData movie : input.getMovies()
+                            ) {
+                                if (actor.getFilmography().contains(movie.getTitle()) && movie.getRating() > 0) {
+                                    total += movie.getRating();
+                                    num++;
+                                }
+                            }
+                            for (SerialInputData serial : input.getSerials()
+                            ) {
+                                if (actor.getFilmography().contains(serial.getTitle()) && serial.totalRating() > 0) {
+                                    total += serial.totalRating();
+                                    num++;
+                                }
+                            }
+                            if (total > 0) {
+                                names.add(actor.getName());
+                                rat.add(total / num);
+                                arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "cikipop " + total + " " + num));
+                            }
+                        }
+                        String temp = "";
+                        double aux = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < names.size(); x++){
+                                for (int i = 0; i < names.size() - x - 1; i++){
+                                    if (rat.get(i) > rat.get(i + 1)){
+                                        temp = names.get(i);
+                                        aux = rat.get(i);
+                                        names.set(i, names.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        names.set(i + 1, temp);
+                                        rat.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < names.size(); x++){
+                                for (int i = 0; i < names.size() - x - 1; i++){
+                                    if (rat.get(i) < rat.get(i + 1)){
+                                        temp = names.get(i);
+                                        aux = rat.get(i);
+                                        names.set(i, names.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        names.set(i + 1, temp);
+                                        rat.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        if (names.size() > 0){
+                            if (names.size() > data.getNumber()){
+                                for (int i = names.size() - 1; i > data.getNumber(); i--){
+                                    names.remove(i);
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + names + " " + rat));
+                    }
+                    if (data.getCriteria().compareTo("awards") == 0) {
+                        ArrayList<String> names = new ArrayList<>();
+                        ArrayList<Integer> number = new ArrayList<>();
+                        List<String> awards = data.getFilters().get(3);
+                        for (ActorInputData actor : input.getActors()
+                        ) {
+                            int ver = 0;
+                            int num = 0;
+                            for (int i = 0; i < awards.size(); i++) {
+                                if (actor.getAwards().containsKey(awards.get(i))) {
+                                    num += actor.getAwards().get(awards.get(i));
+                                }
+                            }
+                            if (ver == awards.size()) {
+                                names.add(actor.getName());
+                                number.add(num);
+                            }
+                        }
+                        String temp = "";
+                        Integer aux = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < names.size(); x++) {
+                                for (int i = 0; i < names.size() - x - 1; i++) {
+                                    if (number.get(i) > number.get(i + 1)) {
+                                        temp = names.get(i);
+                                        aux = number.get(i);
+                                        names.set(i, names.get(i + 1));
+                                        number.set(i, number.get(i + 1));
+                                        names.set(i + 1, temp);
+                                        number.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < names.size(); x++) {
+                                for (int i = 0; i < names.size() - x - 1; i++) {
+                                    if (number.get(i) < number.get(i + 1)) {
+                                        temp = names.get(i);
+                                        aux = number.get(i);
+                                        names.set(i, names.get(i + 1));
+                                        number.set(i, number.get(i + 1));
+                                        names.set(i + 1, temp);
+                                        number.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + names));
+                    }
+                    if (data.getCriteria().compareTo("filter_description") == 0) {
+                        List<String> words = data.getFilters().get(2);
+                        ArrayList<String> names = new ArrayList<>();
+                        for (ActorInputData actor : input.getActors()
+                        ) {
+                            int ver = 0;
+                            for (int i = 0; i < words.size(); i++) {
+                                if (actor.getCareerDescription().indexOf(words.get(i)) != -1) {
+                                    ver++;
+                                }
+                            }
+                            if (ver == words.size()) {
+                                names.add(actor.getName());
+                            }
+                        }
+                        Collections.sort(names);
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + names));
+                    }
+                }
                 if (data.getObjectType().compareTo("users") == 0) {
                     ArrayList<Integer> nrRate = new ArrayList<>();
                     ArrayList<String> rateUsers = new ArrayList<>();
@@ -122,6 +256,509 @@ public final class Main {
                         }
                     }
                     arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + rateUsers));
+                }
+                if (data.getObjectType().compareTo("shows") == 0) {
+                    if (data.getCriteria().compareTo("favorite") == 0) {
+                        ArrayList<String> titlu = new ArrayList<>();
+                        ArrayList<Integer> nfav = new ArrayList<>();
+                        for (SerialInputData serial : input.getSerials()
+                        ) {
+                            List<String> gen = data.getFilters().get(1);
+                            List<String> year = data.getFilters().get(0);
+                            if (year.get(0) != null) {
+                                if (year.get(0).compareTo(String.valueOf(serial.getYear())) == 0) {
+                                    for (int i = 0; i < gen.size(); i++) {
+                                        for (int j = 0; j < serial.getGenres().size(); j++) {
+                                            if (gen.get(i) != null) {
+                                                if (gen.get(i).compareTo(serial.getGenres().get(j)) == 0) {
+                                                    for (UserInputData user : input.getUsers()
+                                                    ) {
+                                                        if (user.getFavoriteMovies().contains(serial.getTitle())) {
+                                                            int nui = 0;
+                                                            if (titlu.size() > 0) {
+                                                                for (int k = 0; k < titlu.size(); k++) {
+                                                                    if (titlu.get(k).compareTo(serial.getTitle()) == 0) {
+                                                                        nfav.set(i, nfav.get(i) + 1);
+                                                                    }
+                                                                }
+                                                                if (nui == 1) {
+                                                                    titlu.add(serial.getTitle());
+                                                                    nfav.add(1);
+                                                                }
+                                                            } else {
+                                                                titlu.add(serial.getTitle());
+                                                                nfav.add(1);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        String temp = "";
+                        Integer aux = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < titlu.size(); x++) {
+                                for (int i = 0; i < titlu.size() - x - 1; i++) {
+                                    if (nfav.get(i) > nfav.get(i + 1)) {
+                                        temp = titlu.get(i);
+                                        aux = nfav.get(i);
+                                        titlu.set(i, titlu.get(i + 1));
+                                        nfav.set(i, nfav.get(i + 1));
+                                        titlu.set(i + 1, temp);
+                                        nfav.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < titlu.size(); x++) {
+                                for (int i = 0; i < titlu.size() - x - 1; i++) {
+                                    if (nfav.get(i) < nfav.get(i + 1)) {
+                                        temp = titlu.get(i);
+                                        aux = nfav.get(i);
+                                        titlu.set(i, titlu.get(i + 1));
+                                        nfav.set(i, nfav.get(i + 1));
+                                        titlu.set(i + 1, temp);
+                                        nfav.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + titlu));
+                    }
+                    if (data.getCriteria().compareTo("longest") == 0) {
+                        ArrayList<String> seriale = new ArrayList<>();
+                        ArrayList<Integer> durata = new ArrayList<>();
+                        String temp = "";
+                        Integer aux = 0;
+                        int is = 0;
+                        for (SerialInputData show : input.getSerials()
+                        ) {
+                            List<String> gen = data.getFilters().get(1);
+                            List<String> year = data.getFilters().get(0);
+                            if (year.get(0) != null) {
+                                if (year.get(0).compareTo(String.valueOf(show.getYear())) == 0) {
+                                    for (int j = 0; j < gen.size(); j++) {
+                                        for (int i = 0; i < show.getGenres().size(); i++) {
+                                            if (gen.get(j) != null) {
+                                                if (gen.get(j).compareTo(show.getGenres().get(i)) == 0) {
+                                                    seriale.add(show.getTitle());
+                                                    int duratie = 0;
+                                                    for (int k = 0; k < show.getSeasons().size(); k++) {
+                                                        duratie += show.getSeasons().get(k).getDuration();
+                                                    }
+                                                    durata.add(duratie);
+                                                    is = 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (is == 1) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < durata.size(); x++) {
+                                for (int i = 0; i < durata.size() - x - 1; i++) {
+                                    if (durata.get(i) > durata.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        aux = durata.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        durata.set(i, durata.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        durata.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < durata.size(); x++) {
+                                for (int i = 0; i < durata.size() - x - 1; i++) {
+                                    if (durata.get(i) < durata.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        aux = durata.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        durata.set(i, durata.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        durata.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        if (seriale.size() > data.getNumber()) {
+                            for (int i = seriale.size() - 1; i > data.getNumber(); i--) {
+                                seriale.remove(i);
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + seriale));
+                    }
+                    if (data.getCriteria().compareTo("ratings") == 0) {
+                        ArrayList<String> seriale = new ArrayList<>();
+                        ArrayList<Double> rat = new ArrayList<>();
+                        for (SerialInputData serial : input.getSerials()
+                        ) {
+                            if (data.getFilters().contains(serial.getYear()) && data.getFilters().contains(serial.getGenres())) {
+                                seriale.add(serial.getTitle());
+                                rat.add(serial.totalRating());
+                            }
+                        }
+                        String temp = "";
+                        double rtmp = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < seriale.size(); x++) {
+                                for (int i = 0; i < seriale.size() - x - 1; i++) {
+                                    if (rat.get(i) > rat.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        rtmp = rat.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        rat.set(i + 1, rtmp);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < seriale.size(); x++) {
+                                for (int i = 0; i > seriale.size() - x - 1; i++) {
+                                    if (rat.get(i) < rat.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        rtmp = rat.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        rat.set(i + 1, rtmp);
+                                    }
+                                }
+                            }
+                        }
+                        if (seriale.size() > data.getNumber()) {
+                            for (int i = seriale.size() - 1; i > data.getNumber(); i--) {
+                                seriale.remove(i);
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + seriale));
+                    }
+                    if (data.getCriteria().compareTo("most_viewed") == 0) {
+                        ArrayList<String> seriale = new ArrayList<>();
+                        ArrayList<Integer> nview = new ArrayList<>();
+                        for (UserInputData user : input.getUsers()) {
+                            for (SerialInputData serial : input.getSerials()) {
+                                if (data.getFilters().contains(serial.getYear()) && data.getFilters().contains(serial.getGenres())) {
+                                    seriale.add(serial.getTitle());
+                                    nview.add(user.getHistory().get(1));
+                                }
+                            }
+                        }
+                        String temp = "";
+                        Integer tenp = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < seriale.size(); x++) {
+                                for (int i = 0; i < seriale.size() - x - 1; i++) {
+                                    if (nview.get(i) > nview.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        tenp = nview.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        nview.set(i, nview.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        nview.set(i + 1, tenp);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < seriale.size(); x++) {
+                                for (int i = 0; i < seriale.size() - x - 1; i++) {
+                                    if (nview.get(i) < nview.get(i + 1)) {
+                                        temp = seriale.get(i);
+                                        tenp = nview.get(i);
+                                        seriale.set(i, seriale.get(i + 1));
+                                        nview.set(i, nview.get(i + 1));
+                                        seriale.set(i + 1, temp);
+                                        nview.set(i + 1, tenp);
+                                    }
+                                }
+                            }
+                        }
+                        if (seriale.size() > 0) {
+                            if (seriale.size() > data.getNumber()) {
+                                for (int i = seriale.size() - 1; i < data.getNumber(); i--) {
+                                    seriale.remove(i);
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + seriale));
+                    }
+                }
+                if (data.getObjectType().compareTo("movies") == 0) {
+                    if (data.getCriteria().compareTo("favorite") == 0) {
+                        ArrayList<String> titlu = new ArrayList<>();
+                        ArrayList<Integer> nfav = new ArrayList<>();
+                        for (MovieInputData movie : input.getMovies()
+                        ) {
+                            List<String> gen = data.getFilters().get(1);
+                            List<String> year = data.getFilters().get(0);
+                            if (year.get(0) != null) {
+                                if (year.get(0).compareTo(String.valueOf(movie.getYear())) == 0) {
+                                    for (int i = 0; i < gen.size(); i++) {
+                                        for (int j = 0; j < movie.getGenres().size(); j++) {
+                                            if (gen.get(i) != null) {
+                                                if (gen.get(i).compareTo(movie.getGenres().get(j)) == 0) {
+                                                    for (UserInputData user : input.getUsers()
+                                                    ) {
+                                                        if (user.getFavoriteMovies().contains(movie.getTitle())) {
+                                                            int nui = 0;
+                                                            if (titlu.size() > 0) {
+                                                                for (int k = 0; k < titlu.size(); k++) {
+                                                                    if (titlu.get(k).compareTo(movie.getTitle()) == 0) {
+                                                                        nfav.set(i, nfav.get(i) + 1);
+                                                                    }
+                                                                }
+                                                                if (nui == 1) {
+                                                                    titlu.add(movie.getTitle());
+                                                                    nfav.add(1);
+                                                                }
+                                                            } else {
+                                                                titlu.add(movie.getTitle());
+                                                                nfav.add(1);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        String temp = "";
+                        Integer aux = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < titlu.size(); x++) {
+                                for (int i = 0; i < titlu.size() - x - 1; i++) {
+                                    if (nfav.get(i) > nfav.get(i + 1)) {
+                                        temp = titlu.get(i);
+                                        aux = nfav.get(i);
+                                        titlu.set(i, titlu.get(i + 1));
+                                        nfav.set(i, nfav.get(i + 1));
+                                        titlu.set(i + 1, temp);
+                                        nfav.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < titlu.size(); x++) {
+                                for (int i = 0; i < titlu.size() - x - 1; i++) {
+                                    if (nfav.get(i) < nfav.get(i + 1)) {
+                                        temp = titlu.get(i);
+                                        aux = nfav.get(i);
+                                        titlu.set(i, titlu.get(i + 1));
+                                        nfav.set(i, nfav.get(i + 1));
+                                        titlu.set(i + 1, temp);
+                                        nfav.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + titlu));
+                    }
+                    if (data.getCriteria().compareTo("longest") == 0) {
+                        ArrayList<String> filme = new ArrayList<>();
+                        ArrayList<Integer> durata = new ArrayList<>();
+                        String temp = "";
+                        Integer aux = 0;
+                        int is = 0;
+                        for (MovieInputData movie : input.getMovies()
+                        ) {
+                            List<String> gen = data.getFilters().get(1);
+                            List<String> year = data.getFilters().get(0);
+                            if (year.get(0) != null) {
+                                if (year.get(0).compareTo(String.valueOf(movie.getYear())) == 0) {
+                                    for (int j = 0; j < gen.size(); j++) {
+                                        for (int i = 0; i < movie.getGenres().size(); i++) {
+                                            if (gen.get(j) != null) {
+                                                if (gen.get(j).compareTo(movie.getGenres().get(i)) == 0) {
+                                                    filme.add(movie.getTitle());
+                                                    durata.add(movie.getDuration());
+                                                    is = 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (is == 1) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < durata.size(); x++) {
+                                for (int i = 0; i < durata.size() - x - 1; i++) {
+                                    if (durata.get(i) > durata.get(i + 1)) {
+                                        temp = filme.get(i);
+                                        aux = durata.get(i);
+                                        filme.set(i, filme.get(i + 1));
+                                        durata.set(i, durata.get(i + 1));
+                                        filme.set(i + 1, temp);
+                                        durata.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < durata.size(); x++) {
+                                for (int i = 0; i < durata.size() - x - 1; i++) {
+                                    if (durata.get(i) < durata.get(i + 1)) {
+                                        temp = filme.get(i);
+                                        aux = durata.get(i);
+                                        filme.set(i, filme.get(i + 1));
+                                        durata.set(i, durata.get(i + 1));
+                                        filme.set(i + 1, temp);
+                                        durata.set(i + 1, aux);
+                                    }
+                                }
+                            }
+                        }
+                        if (filme.size() > data.getNumber()) {
+                            for (int i = filme.size() - 1; i > data.getNumber(); i--) {
+                                filme.remove(i);
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + filme));
+                    }
+                    if (data.getCriteria().compareTo("ratings") == 0) {
+                        ArrayList<String> movies = new ArrayList<>();
+                        ArrayList<Double> rat = new ArrayList<>();
+                        for (MovieInputData movie : input.getMovies()
+                        ) {
+                            if (data.getFilters().contains(movie.getYear()) && data.getFilters().contains(movie.getGenres())) {
+                                movies.add(movie.getTitle());
+                                rat.add(movie.getRating());
+                            }
+                        }
+                        String temp = "";
+                        double rtmp = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < movies.size(); x++) {
+                                for (int i = 0; i < movies.size() - x - 1; i++) {
+                                    if (rat.get(i) > rat.get(i + 1)) {
+                                        temp = movies.get(i);
+                                        rtmp = rat.get(i);
+                                        movies.set(i, movies.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        movies.set(i + 1, temp);
+                                        rat.set(i + 1, rtmp);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < movies.size(); x++) {
+                                for (int i = 0; i > movies.size() - x - 1; i++) {
+                                    if (rat.get(i) < rat.get(i + 1)) {
+                                        temp = movies.get(i);
+                                        rtmp = rat.get(i);
+                                        movies.set(i, movies.get(i + 1));
+                                        rat.set(i, rat.get(i + 1));
+                                        movies.set(i + 1, temp);
+                                        rat.set(i + 1, rtmp);
+                                    }
+                                }
+                            }
+                        }
+                        if (movies.size() > data.getNumber()) {
+                            for (int i = movies.size() - 1; i > data.getNumber(); i--) {
+                                movies.remove(i);
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + movies));
+                    }
+                    if (data.getCriteria().compareTo("most_viewed") == 0) {
+                        ArrayList<String> movies = new ArrayList<>();
+                        ArrayList<Integer> nview = new ArrayList<>();
+                        for (UserInputData user : input.getUsers()) {
+                            for (MovieInputData movie : input.getMovies()) {
+                                if (user.getHistory().containsKey(movie.getTitle())) {
+                                    List<String> gen = data.getFilters().get(1);
+                                    List<String> year = data.getFilters().get(0);
+                                    int is = 0;
+                                    int este = 0;
+                                    if (year.get(0) != null) {
+                                        if (year.get(0).compareTo(String.valueOf(movie.getYear())) == 0) {
+                                            for (int j = 0; j < gen.size(); j++) {
+                                                for (int i = 0; i < movie.getGenres().size(); i++) {
+                                                    if (gen.get(j) != null) {
+                                                        if (gen.get(j).compareTo(movie.getGenres().get(i)) == 0) {
+                                                            if (movies.size() > 0) {
+                                                                for (int k = 0; k < movies.size(); k++) {
+                                                                    if (movies.get(k).compareTo(movie.getTitle()) == 0) {
+                                                                        nview.add(nview.get(k) + 1);
+                                                                        este = 1;
+                                                                    }
+                                                                }
+                                                                if (este == 0) {
+                                                                    movies.add(movie.getTitle());
+                                                                    nview.add(1);
+                                                                }
+                                                            } else {
+                                                                movies.add(movie.getTitle());
+                                                                nview.add(1);
+                                                            }
+                                                            is = 1;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (is == 1) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        String temp = "";
+                        Integer tenp = 0;
+                        if (data.getSortType().compareTo("asc") == 0) {
+                            for (int x = 0; x < movies.size(); x++) {
+                                for (int i = 0; i < movies.size() - x - 1; i++) {
+                                    if (nview.get(i) > nview.get(i + 1)) {
+                                        temp = movies.get(i);
+                                        tenp = nview.get(i);
+                                        movies.set(i, movies.get(i + 1));
+                                        nview.set(i, nview.get(i + 1));
+                                        movies.set(i + 1, temp);
+                                        nview.set(i + 1, tenp);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (int x = 0; x < movies.size(); x++) {
+                                for (int i = 0; i < movies.size() - x - 1; i++) {
+                                    if (nview.get(i) < nview.get(i + 1)) {
+                                        temp = movies.get(i);
+                                        tenp = nview.get(i);
+                                        movies.set(i, movies.get(i + 1));
+                                        nview.set(i, nview.get(i + 1));
+                                        movies.set(i + 1, temp);
+                                        nview.set(i + 1, tenp);
+                                    }
+                                }
+                            }
+                        }
+                        if (movies.size() > 0) {
+                            if (movies.size() > data.getNumber()) {
+                                for (int i = movies.size() - 1; i < data.getNumber(); i--) {
+                                    movies.remove(i);
+                                }
+                            }
+                        }
+                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "Query result: " + movies));
+                    }
                 }
             }
             if (data.getActionType().compareTo("recommendation") == 0) {
@@ -274,9 +911,13 @@ public final class Main {
                             if (movie.getTitle().compareTo(data.getTitle()) == 0) {
                                 if (user.getHistory().containsKey(movie.getTitle())) {
                                     if (data.getType().compareTo("rating") == 0) {
-                                        movie.setRating(data.getGrade());
-                                        user.setRateMovies(movie.getTitle());
-                                        arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "success -> " + movie.getTitle() + " was rated with " + data.getGrade() + " by " + user.getUsername()));
+                                        if (movie.getRating() > 0){
+                                            arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "error -> " + movie.getTitle() + " has been already rated"));
+                                        } else {
+                                            movie.setRating(data.getGrade());
+                                            user.setRateMovies(movie.getTitle());
+                                            arrayResult.add(fileWriter.writeFile(data.getActionId(), "message", "success -> " + movie.getTitle() + " was rated with " + data.getGrade() + " by " + user.getUsername()));
+                                        }
                                     }
                                 } else {
                                     if (data.getType().compareTo("rating") == 0) {
