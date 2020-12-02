@@ -40,8 +40,8 @@ public final class Season {
         return ratings;
     }
 
-    public void setRatings(final List<Double> ratings) {
-        this.ratings = ratings;
+    public void setRatings(double ratings) {
+        this.ratings.add(ratings);
     }
 
     @Override
